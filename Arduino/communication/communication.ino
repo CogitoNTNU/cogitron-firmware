@@ -55,8 +55,7 @@ void loop() {
 }
 
 void messageHandler(String message){
-  if(message == "forward"){
+ 
     driver.goForward();
-  }
-  driver.goForward();
+
 }
