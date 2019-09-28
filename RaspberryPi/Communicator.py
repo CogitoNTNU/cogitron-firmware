@@ -1,6 +1,6 @@
 import fakeSerial as emu
 import serial as real
-
+import time
 
 
 class Communicator(object):
@@ -16,21 +16,26 @@ class Communicator(object):
 
 
     def receiveMessage(self):
-        bufferSize = 0
         messageReceived = ""
-        while bufferSize<9: #needs another way to break the while loop, blocking read methods if no content.
+        
+        time.sleep(0.5) # in_waiting won't work without this time sleep.
+       
+        while self.com.in_waiting >0:
             byteReceived = ord(self.com.read())
             letter = chr(byteReceived)
-            messageReceived += letter
-            bufferSize += 1
+            if(letter != ""):
+                messageReceived += letter
         return messageReceived
 
 
 if __name__ == "__main__":
-    bob = Communicator("real")
-    print(bob.receiveMessage())
-    bob.sendMessage("driveForward")
-    print(bob.receiveMessage())
-   
+    '''The emulator is not working, especially because their is not attribute in_waiting, to tell the buffer size
+    But! Commmunication seems to be working both ways'''
+
+    bob = Communicator("real") #instance of Communicator
+    messageOut = "driveForward" #the message to send to arduino
     
+    while True:
+        print(bob.receiveMessage()) 
+        bob.sendMessage(messageOut)
 

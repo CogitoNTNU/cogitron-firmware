@@ -48,16 +48,15 @@ void loop() {
     message += char(received);
   }
 
-  Serial.print(message);
   if (message != "") {
-    messageHandler(message);
+    outgoingMessage(message);
     message = ""; 
   }
 }
 
-void messageHandler(String message){
-    while(true){
-         Serial.write("test");
-    }
-
+void outgoingMessage(String message){
+  for(int i=0; i<message.length(); i++){
+    Serial.write((byte)message[i]);
+  }
+         
 }
