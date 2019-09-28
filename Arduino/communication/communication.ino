@@ -48,6 +48,7 @@ void loop() {
     message += char(received);
   }
 
+  Serial.print(message);
   if (message != "") {
     messageHandler(message);
     message = ""; 
@@ -55,7 +56,8 @@ void loop() {
 }
 
 void messageHandler(String message){
- 
-    driver.goForward();
+    while(true){
+         Serial.write("test");
+    }
 
 }
