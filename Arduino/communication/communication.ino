@@ -31,32 +31,40 @@ class MotorControl {
 
 
 
-String message = "";
+String messageOut = "";
+
 MotorControl driver;
 
 void setup() {
   driver = MotorControl();
   Serial.begin(9600);
-  Serial.write("Connected");
+  Serial.write("Connected\n");
 }
 
 
 void loop() {
-
-  while (Serial.available() > 0) {
-    byte received = Serial.read();
-    message += char(received);
+  readMessage();
+  if(messageOut != ""){
+    //outgoingMessage(messageOut);
   }
+}
 
-  if (message != "") {
-    outgoingMessage(message);
-    message = ""; 
+void readMessage(){
+  int check = Serial.peek();
+  String incomingMessage;
+  
+  while(check > -1){
+     byte in = Serial.read();
+     incomingMessage += (char) in;
+     check = Serial.peek();
   }
+  outgoingMessage(incomingMessage);
+
+  
 }
 
 void outgoingMessage(String message){
   for(int i=0; i<message.length(); i++){
-    Serial.write((byte)message[i]);
+    Serial.write(message[i]);
   }
-         
 }
