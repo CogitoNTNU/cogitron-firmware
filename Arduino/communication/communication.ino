@@ -1,70 +1,41 @@
-class MotorControl {
-  public:
-    void goForward() {
-      Serial.print("Forward");
-    }
 
-    void reverse() {
-      Serial.print("Reverse");
-    }
-
-    void turnLeft() {
-      Serial.print("Turn left");
-    }
-
-    void turnRight() {
-      Serial.print("Turn right");
-    }
-
-    void pivotLeft() {
-      Serial.print("Pivot left");
-    }
-
-    void pivotRight() {
-      Serial.print("Pivot right");
-    }
-
-    void stopMotor() {
-      Serial.print("Stop motor");
-    }
-};
-
-
-
-String messageOut = "";
-
-MotorControl driver;
+//char buf[200] = {};
 
 void setup() {
-  driver = MotorControl();
   Serial.begin(9600);
   Serial.write("Connected\n");
 }
 
 
 void loop() {
-  readMessage();
-  if(messageOut != ""){
-    //outgoingMessage(messageOut);
-  }
+  incomingMessage();
+  //outgoingMessage();
 }
 
-void readMessage(){
-  int check = Serial.peek();
-  String incomingMessage;
-  
-  while(check > -1){
-     byte in = Serial.read();
-     incomingMessage += (char) in;
-     check = Serial.peek();
-  }
-  outgoingMessage(incomingMessage);
+void incomingMessage(){
+  //int readForN = Serial.read();
+  int incomingByte;
+  incomingByte = Serial.read();
 
-  
+    if(incomingByte != -1){
+      char buf[200] = {};
+      Serial.readBytes(buf, incomingByte);
+
+      String message = "";
+      
+      for(int i = 0; i <= incomingByte; i++){
+          message += buf[i];
+      }
+      
+      //Serial.print(message);
+      handleMessage(message);
+    }
+}
+
+void handleMessage(String message){
+     outgoingMessage("Arduino got: " + message);
 }
 
 void outgoingMessage(String message){
-  for(int i=0; i<message.length(); i++){
-    Serial.write(message[i]);
-  }
+  Serial.print(message);
 }
