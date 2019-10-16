@@ -1,10 +1,10 @@
-int ledPin = 13;
+
 
 
 void setup() {
   Serial.begin(9600);
   Serial.write("Connected");
-  pinMode(ledPin, OUTPUT);
+  pinMode(13, OUTPUT);
 }
 
 
@@ -24,9 +24,9 @@ void loop() {
 
 
 void blinkLed(){
-  digitalWrite(ledPin, HIGH);
+  digitalWrite(13, HIGH);
   delay(1000);
-  digitalWrite(ledPin, LOW);
+  digitalWrite(13, LOW);
   delay(1000);
 }
 
