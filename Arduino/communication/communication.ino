@@ -3,19 +3,18 @@
 
 void setup() {
   Serial.begin(9600);
-  Serial.write("Connected");
   pinMode(13, OUTPUT);
 }
 
 
 void loop() {
-  String incomingMsg = "";
+  int * incomingMsg;
   
   if(Serial.available() >0){
     incomingMsg = incomingMessage(); 
   }
 
-  if(incomingMsg != ""){
+  if(!(incomingMsg)){
     handleMessage(incomingMsg);
   }
   //outgoingMessage();
@@ -31,26 +30,30 @@ void blinkLed(){
 }
 
 
-String incomingMessage(){
+int * incomingMessage(){
   int incomingByte = Serial.read();
-  String message = "";
+  int message[incomingByte] = {};
   
     if(incomingByte != -1){
       char buf[200] = {};
       Serial.readBytes(buf, incomingByte);
       for(int i = 0; i <= incomingByte; i++){
-          message += buf[i];
+          message[i] = (int)buf[i];
       }
     }
+
     return message;
 }
 
-void handleMessage(String message){
+void handleMessage(int message[]){
      outgoingMessage(message);
 }
 
-void outgoingMessage(String message){
-  for(int i=0; i<message.length(); i++){
+void outgoingMessage(int * message){
+  byte outgoingByte = 3;//(byte) (sizeof(message) / sizeof(message[0]));
+  Serial.write(outgoingByte);
+  
+  for(int i=1; i<sizeof(message) / sizeof(message[0]); i++){
     Serial.write(message[i]);
   }
 
