@@ -10,15 +10,40 @@ void setup() {
   Serial.setTimeout(5);
 }
 
-int drive_forward(int dist) {
-  Serial.println("Driving forward!");  
+int setMotor(int motor, int speed) {
+  Serial.println("setMotorAck");  
+}
+
+int setMotors(int motor1, int motor2, int speed){
+  Serial.println("setMotorsAck");
+}
+
+int moveServo(int servoId, int degree){
+  Serial.println("moveServoAck");
+}
+
+int getMotor(int motorId, int speed){
+  Serial.println("getMotor");
 }
 
 int handle_command() {
   if(n_tokens > 0) {
-    if(token_buffer[0].equals("motor")){
-      if(n_tokens == 2) {
-        drive_forward(token_buffer[1].toInt());  
+    
+    if(token_buffer[0].equals("setMotor")){
+      if(n_tokens == 3) {
+        setMotor(token_buffer[1].toInt(), token_buffer[2].toInt());  
+      } 
+    } else if(token_buffer[0].equals("setMotors")){
+      if(n_tokens == 4){
+        setMotors(token_buffer[1].toInt(), token_buffer[2].toInt(), token_buffer[3].toInt());
+      }
+    } else if(token_buffer[0].equals("moveServo")){
+      if(n_tokens == 3){
+        moveServo(token_buffer[1].toInt(),token_buffer[2].toInt());
+      }
+    } else if(token_buffer[0].equals("getMotor")){
+      if(n_tokens == 3){
+        getMotor(token_buffer[1].toInt(), token_buffer[2].toInt());
       }
     }
   }
@@ -26,7 +51,7 @@ int handle_command() {
 
 void loop()
 {
-  Serial.println("rangeSense;0;20");
+  //Serial.println("rangeSense;0;20");
   
   if ( Serial.available()) {
     serialResponse = Serial.readStringUntil('\r\n');
