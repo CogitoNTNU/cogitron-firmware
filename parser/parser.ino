@@ -1,20 +1,57 @@
 #include "Arduino.h"
+#include <Wire.h>
+#include <Adafruit_MotorShield.h>
+#include <Servo.h>
+#include <NewPing.h>
+
+Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 
 String serialResponse = "";
 char sz[] = "";
 int n_tokens = 0;
 String token_buffer[16];
 
+Adafruit_DCMotor *motorLeft = AFMS.getMotor(1);
+Adafruit_DCMotor *motorRight = AFMS.getMotor(2);
+
+Adafruit_DCMotor* motors[] = {
+  motorLeft,
+  motorRight
+};
+
 void setup() {
   Serial.begin(9600);
   Serial.setTimeout(5);
+  AFMS.begin();
 }
 
 int setMotor(int motor, int speed) {
-  Serial.println("setMotorAck");  
+  if(motor < 2) {
+    motors[motor]->setSpeed(speed);
+    
+    if(speed > 0)
+      motors[motor]->run(FORWARD);
+    else
+      motors[motor]->run(RELEASE);
+      
+    Serial.println("setMotorAck");  
+  }
 }
 
 int setMotors(int motor1, int motor2, int speed){
+  motors[0]->setSpeed(motor1);
+  motors[1]->setSpeed(motor2);
+   
+  if(motor1 > 0)
+      motors[0]->run(FORWARD);
+    else
+      motors[0]->run(RELEASE);
+  
+  if(motor2 > 0)
+      motors[1]->run(FORWARD);
+    else
+      motors[1]->run(RELEASE);
+    
   Serial.println("setMotorsAck");
 }
 
