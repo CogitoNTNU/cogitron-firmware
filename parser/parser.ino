@@ -1,8 +1,11 @@
 #include "Arduino.h"
 #include <Wire.h>
 #include <Adafruit_MotorShield.h>
+#include "utility/Adafruit_MS_PWMServoDriver.h"
 #include <Servo.h>
 #include <NewPing.h>
+
+
 
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 
@@ -19,10 +22,34 @@ Adafruit_DCMotor* motors[] = {
   motorRight
 };
 
+
+const int NO_OF_SERVOS = 12;
+Servo *servos[NO_OF_SERVOS];
+
+
 void setup() {
   Serial.begin(9600);
   Serial.setTimeout(5);
   AFMS.begin();
+
+
+ int counter = 0;
+  while(counter<NO_OF_SERVOS){
+    servos[counter] = new Servo();
+ 
+    if(counter >=0 && counter <=2){
+      servos[counter]->attach(counter);
+    }
+    else if(counter >= 3 && counter <= 7){
+      servos[counter]->attach(counter);
+    } else if(counter > 7 ){
+      servos[counter]->attach(counter);
+    }
+    
+    counter += 1;
+    Serial.println(counter);
+  }
+
 }
 
 int setMotor(int motor, int speed) {
@@ -57,6 +84,7 @@ int setMotors(int motor1, int motor2, int speed){
 
 int moveServo(int servoId, int degree){
   Serial.println("moveServoAck");
+  servos[servoId]->write(degree);
 }
 
 int getMotor(int motorId, int speed){
