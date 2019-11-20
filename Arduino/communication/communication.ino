@@ -1,62 +1,60 @@
-class MotorControl {
-  public:
-    void goForward() {
-      Serial.print("Forward");
-    }
-
-    void reverse() {
-      Serial.print("Reverse");
-    }
-
-    void turnLeft() {
-      Serial.print("Turn left");
-    }
-
-    void turnRight() {
-      Serial.print("Turn right");
-    }
-
-    void pivotLeft() {
-      Serial.print("Pivot left");
-    }
-
-    void pivotRight() {
-      Serial.print("Pivot right");
-    }
-
-    void stopMotor() {
-      Serial.print("Stop motor");
-    }
-};
 
 
-
-String message = "";
-MotorControl driver;
 
 void setup() {
-  driver = MotorControl();
   Serial.begin(9600);
-  Serial.write("Connected");
+  pinMode(13, OUTPUT);
 }
 
 
 void loop() {
-
-  while (Serial.available() > 0) {
-    byte received = Serial.read();
-    message += char(received);
+  int * incomingMsg;
+  
+  if(Serial.available() >0){
+    incomingMsg = incomingMessage(); 
   }
 
-  if (message != "") {
-    outgoingMessage(message);
-    message = ""; 
+  if(!(incomingMsg)){
+    handleMessage(incomingMsg);
   }
+  //outgoingMessage();
+  blinkLed();
 }
 
-void outgoingMessage(String message){
-  for(int i=0; i<message.length(); i++){
-    Serial.write((byte)message[i]);
+
+void blinkLed(){
+  digitalWrite(13, HIGH);
+  delay(1000);
+  digitalWrite(13, LOW);
+  delay(1000);
+}
+
+
+int * incomingMessage(){
+  int incomingByte = Serial.read();
+  int message[incomingByte] = {};
+  
+    if(incomingByte != -1){
+      char buf[200] = {};
+      Serial.readBytes(buf, incomingByte);
+      for(int i = 0; i <= incomingByte; i++){
+          message[i] = (int)buf[i];
+      }
+    }
+
+    return message;
+}
+
+void handleMessage(int message[]){
+     outgoingMessage(message);
+}
+
+void outgoingMessage(int * message){
+  byte outgoingByte = 3;//(byte) (sizeof(message) / sizeof(message[0]));
+  Serial.write(outgoingByte);
+  
+  for(int i=1; i<sizeof(message) / sizeof(message[0]); i++){
+    Serial.write(message[i]);
   }
-         
+
 }
