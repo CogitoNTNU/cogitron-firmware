@@ -1,13 +1,16 @@
 #include "Arduino.h"
 #include <Wire.h>
 #include <Adafruit_MotorShield.h>
-#include "utility/Adafruit_MS_PWMServoDriver.h"
+#include <Adafruit_PWMServoDriver.h>
 #include <Servo.h>
 #include <NewPing.h>
 
 
 
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+
+
 
 String serialResponse = "";
 char sz[] = "";
@@ -22,33 +25,26 @@ Adafruit_DCMotor* motors[] = {
   motorRight
 };
 
-
-const int NO_OF_SERVOS = 12;
-Servo *servos[NO_OF_SERVOS];
-
+#define SERVOMIN  150 // This is the 'minimum' pulse length count (out of 4096)
+#define SERVOMAX  600 // This is the 'maximum' pulse length count (out of 4096)
+#define USMIN  600 // This is the rounded 'minimum' microsecond length based on the minimum pulse of 150
+#define USMAX  2400 // This is the rounded 'maximum' microsecond length based on the maximum pulse of 600
+#define SERVO_FREQ 60 // Analog servos run at ~60 Hz updates
 
 void setup() {
   Serial.begin(9600);
   Serial.setTimeout(5);
   AFMS.begin();
+  pwm.begin();
 
+  // In theory the internal oscillator is 25MHz but it really isn't
+  // that precise. You can 'calibrate' by tweaking this number till
+  // you get the frequency you're expecting!
+  pwm.setOscillatorFrequency(27000000);  // The int.osc. is closer to 27MHz  
+  pwm.setPWMFreq(SERVO_FREQ);  // Analog servos run at ~60 Hz updates
 
- int counter = 0;
-  while(counter<NO_OF_SERVOS){
-    servos[counter] = new Servo();
- 
-    if(counter >=0 && counter <=2){
-      servos[counter]->attach(counter);
-    }
-    else if(counter >= 3 && counter <= 7){
-      servos[counter]->attach(counter);
-    } else if(counter > 7 ){
-      servos[counter]->attach(counter);
-    }
-    
-    counter += 1;
-    Serial.println(counter);
-  }
+  
+  delay(10);
 
 }
 
@@ -83,8 +79,10 @@ int setMotors(int motor1, int motor2, int speed){
 }
 
 int moveServo(int servoId, int degree){
+  int pulseLength = map(degree, 0, 180, SERVOMIN, SERVOMAX);
+
   Serial.println("moveServoAck");
-  servos[servoId]->write(degree);
+  pwm.setPWM(servoId, 0, pulseLength);
 }
 
 int getMotor(int motorId, int speed){
