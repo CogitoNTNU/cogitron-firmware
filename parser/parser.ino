@@ -80,7 +80,6 @@ int setMotors(int motor1, int motor2, int speed){
 
 int moveServo(int servoId, int degree){
   int pulseLength = map(degree, 0, 180, SERVOMIN, SERVOMAX);
-
   Serial.println("moveServoAck");
   pwm.setPWM(servoId, 0, pulseLength);
 }
