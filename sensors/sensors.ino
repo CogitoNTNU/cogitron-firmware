@@ -1,5 +1,7 @@
 #include <NewPing.h>    //Library that allows reading from multiple ultrasonic sensors
 #include <ADXL335.h>
+#include <SK6812.h>
+
 
 const int inputPin = 3;            // Input pin (for PIR sensor - pyroelectric infrared sensor)
 int pirState = LOW;               // Starting by assuming no motion detected
@@ -22,6 +24,16 @@ unsigned long pingTimer[sonars];  // When each pings
 unsigned int cm[sonars];         // Store ping distances.
 uint8_t currentSensor = 0;      // Which sensor is active.
 
+SK6812 LED(8);
+
+RGBW color1 = {255, 0, 129, 255}; // 255 blue, 50 white
+
+String serialResponse = "";
+char sz[] = "";
+int n_tokens = 0;
+String token_buffer[16];
+
+
  
 NewPing sonar[sonars] = { // Sensor object array for the two sensors
   //NewPin(TrigPin, EchoPin, max_distance) this is the format
@@ -37,6 +49,7 @@ void setup() {
   pingTimer[0] = millis() + 75; // First ping start in ms.
   for (uint8_t i = 1; i < sonars; i++)
     pingTimer[i] = pingTimer[i - 1] + pingInterval;
+  LED.set_output(4); // Digital Pin 4
 }
 //OK setup
 
@@ -54,7 +67,26 @@ void loop() {
       sonar[currentSensor].ping_timer(echoCheck);
       accelerometer();
       pirSensor();
+      if ( Serial.available()) {
+    serialResponse = Serial.readStringUntil('\r\n');
+    
+    char buf[sizeof(sz) * 256];
+    serialResponse.toCharArray(buf, sizeof(buf));
+    char *p = buf;
+    char *str;
+    n_tokens = 0;
+    
+    while ((str = strtok_r(p, ";", &p)) != NULL) {
+      token_buffer[n_tokens] = str;
+      n_tokens++;
     }
+    handle_command();
+  }
+      
+    }
+  
+  
+  delay(100);
   }
   
 //OK loop
@@ -119,4 +151,52 @@ void pirSensor() {
 
   }
 
+void ledStrip(int R, int G, int B) {
+    LED.set_rgbw(0, {G, R, B, G});
+    LED.set_rgbw(1, {R, B, G, R});
+    LED.set_rgbw(2, {B, G, R, B});
+    LED.set_rgbw(3, {G, R, B, G});
+    LED.set_rgbw(4, {R, B, G, R});
+    LED.set_rgbw(5, {B, G, R, B});
+/*
+  if(mode == 2){
+    LED.set_rgbw(0, {0, 255, 0, 0}); // Set first LED to color1
+    LED.set_rgbw(1, {255, 0, 0, 255}); // Set first LED to color1
+    LED.set_rgbw(2, {0, 0, 255, 0}); // Set first LED to color1
+    LED.set_rgbw(3, {0, 255, 0, 0}); // Set first LED to color1
+    LED.set_rgbw(4, {255, 0, 0, 255}); // Set first LED to color1
+    LED.set_rgbw(5, {0, 0, 255, 0}); // Set first LED to color1
+  }else if(mode == 1){ 
+    LED.set_rgbw(0, {0, 255, 129, 0}); // Set first LED to color1
+    LED.set_rgbw(1, {255, 129, 0, 255}); // Set first LED to color1
+    LED.set_rgbw(2, {129, 0, 255, 129}); // Set first LED to color1
+    LED.set_rgbw(3, {0, 255, 129, 0}); // Set first LED to color1
+    LED.set_rgbw(4, {255, 129, 0, 255}); // Set first LED to color1
+    LED.set_rgbw(5, {129, 0, 255, 129}); // Set first LED to color1
+  }else if(mode == 0){
+    LED.set_rgbw(0, {0, 0, 0, 0}); // Set first LED to color1
+    LED.set_rgbw(1, {0, 0, 0, 0}); // Set first LED to color1
+    LED.set_rgbw(2, {0, 0, 0, 0}); // Set first LED to color1
+    LED.set_rgbw(3, {0, 0, 0, 0}); // Set first LED to color1
+    LED.set_rgbw(4, {0, 0, 0, 0}); // Set first LED to color1
+    LED.set_rgbw(5, {0, 0, 0, 0}); // Set first LED to color1
+  }
+*/
   
+  LED.sync();
+
+}
+
+int handle_command() {
+  if(n_tokens > 0) {
+    
+    if(token_buffer[0].equals("setLed")){
+      if(n_tokens == 4) {
+        int R = token_buffer[1].toInt();
+        int G = token_buffer[2].toInt();
+        int B = token_buffer[3].toInt();
+        ledStrip(R,G,B);
+        }
+      } 
+    } 
+  }
